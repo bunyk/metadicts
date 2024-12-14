@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Multi Dictionary Lookup",
+  "version": "1.0",
+  "description": "Perform dictionary lookups (udew, dict, multitran, wiki) directly from the extension.",
+  "action": {
+    "default_icon": "Wikibooks-logo.svg.png",
+	"default_title": "Multi Dictionary Lookup Extension"
+  },
+  "permissions": [
+    "storage", "tabs"
+  ],
+  "host_permissions": [
+    "https://udew.uni-leipzig.de/*",
+    "https://dict.com/*",
+    "https://www.multitran.com/*",
+    "https://de.wikipedia.org/*"
+  ],
+  "icons": {
+    "128": "Wikibooks-logo.svg.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
