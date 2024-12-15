@@ -14,7 +14,9 @@
     "https://udew.uni-leipzig.de/*",
     "https://dict.com/*",
     "https://www.multitran.com/*",
-    "https://de.wikipedia.org/*"
+    "https://de.wikipedia.org/*",
+	"https://deuk.dict.cc/*",
+	"https://dict.cc/*"
   ],
   "icons": {
     "128": "Wikibooks-logo.svg.png"

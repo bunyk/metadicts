@@ -1,35 +1,29 @@
 import { useState, useEffect } from 'react';
+import { loadTranslations } from './dictionaries.js';
 
 const borderStyle = {
 	border: "1px solid #d3d3d3",
 	margin: "0px",
-	padding: "0.5em",
-}
-
-async function fetchTranslations(word) {
-	await new Promise(r => setTimeout(r, 2000));
-	return [
-		{de: "Paradebeispiel", uk: "приклад {ч}", source:"udew"},
-		{de: "Paradebeispiel", uk: "зразок {ч}", source:"dict.com"},
-	]
+	padding: "0.3em",
 }
 
 export default function Translations({ word }) {
 	const [translations, setTranslations] = useState([])
-	const [loading, setLoading] = useState(true)
+	const [loading, setLoading] = useState(null);
 
 	  useEffect(() => {
-		 async function getTranslations() {
-			 const translations = await fetchTranslations(word);
-			 setTranslations(translations);
-			 setLoading(false);
-		 }
-		 getTranslations();
+		  setLoading(true);
+		  setTranslations([]);
+		  loadTranslations(word, (entry) => {
+			  setTranslations((prev) => [...prev, entry]);
+		  }, () => {
+			  setLoading(false);
+		  })
 	  }, [word, setTranslations])
+	console.log(translations)
 	return (
 		<div style={{
-			marginLeft: "320px",
-				padding: "3em",
+			padding: "1em",
 		}}>
 			<table style={{
 				... borderStyle,
@@ -37,13 +31,17 @@ export default function Translations({ word }) {
 			}}>
 				<tr>
 					<th>Deutsch</th>
-					<th>Ukrainisch</th>
-					<th>Quelle</th>
+					<th>Українська</th>
+					<th>Джерело</th>
 				</tr>
 				{translations.map((t, i) => (
 					<tr key={i}>
-						<td style={borderStyle}>{t.de}</td>
-						<td style={borderStyle}>{t.uk}</td>
+						<td style={borderStyle}
+							dangerouslySetInnerHTML={{__html: t.de}}
+						></td>
+						<td style={borderStyle}
+							dangerouslySetInnerHTML={{__html: t.uk}}
+						></td>
 						<td style={borderStyle}>{t.source}</td>
 					</tr>
 				))}	
