@@ -40,13 +40,13 @@ export default function SearchPage() {
 			flex: 1,
 			overflowY: 'auto',
 		}}>
-          <Translations word={params.q} />
+	  	    {params.q && <Translations word={params.q} />}
         </div>
         <div style={{
 			flex: 1,
 			overflowY: 'auto',
 		}}>
-          <DictCC word={params.q} />
+	  		{params.q && <DictCC word={params.q} />}
         </div>
       </div>
     </div>

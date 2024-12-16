@@ -307,6 +307,7 @@ function wiki(word, onNewEntry, onLoaded) {
               uk: `<a target="_blank" href="https://uk.wikipedia.org/w/index.php?fulltext=1&search=${encodeURIComponent(word)}&title=%D0%A1%D0%BF%D0%B5%D1%86%D1%96%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0:%D0%9F%D0%BE%D1%88%D1%83%D0%BA&ns0=1">пошук</a>`,
               source: "wiki"
             })
+            break;
         }
         let extract = page.extract;
         let links = page.langlinks || [];
@@ -323,8 +324,6 @@ function wiki(word, onNewEntry, onLoaded) {
         onNewEntry(entry);
         
     }
-    // let parsed = parseWiki(jsonStr);
-    // onNewEntry({source: "wiki", "de": parsed});
   })
   .finally(() => onLoaded());
 }
