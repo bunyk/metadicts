@@ -20,7 +20,7 @@ export default function SearchPage() {
           height: '40px',
           width: '100%',
           flexShrink: 0,          // Prevent the header from shrinking
-          backgroundColor: '#eee' // Just for demo; remove or change as needed
+          backgroundColor: '#eee'
 	  }}>
         <Search key={params.q} q={params.q || ""} />
       </div>
@@ -32,13 +32,13 @@ export default function SearchPage() {
 	  }}>
         <div style={{
 			width: '300px',
-			overflowY: 'auto',
+			overflowY: 'scroll',
 		}}>
           <Backlog />
         </div>
         <div style={{
 			flex: 1,
-			overflowY: 'auto',
+			overflowY: 'scroll',
 		}}>
 	  	    {params.q && <Translations word={params.q} />}
         </div>

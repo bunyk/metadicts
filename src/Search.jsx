@@ -2,21 +2,19 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
 function Search({q}) {
-	const navigate = useNavigate();
+  const navigate = useNavigate();
   const [query, setQuery] = useState(q);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-		navigate(`/search/${query}`);
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [query, navigate, q]);
 
   return (
 	<input type="text"
 		placeholder="Введіть слово для пошуку..."
 	  	value={query}
-	  	onChange={(e) => setQuery(e.target.value)}
+	    onChange={(e) => setQuery(e.target.value)}
+	  	onKeyDown={(e) => {
+			if (e.key === 'Enter') {
+				navigate(`/search/${e.target.value}`);
+			}
+		}}
 	    style={{
             padding: "6px",
 			margin: "4px",

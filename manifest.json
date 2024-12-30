@@ -4,7 +4,7 @@
   "version": "1.0",
   "description": "Perform dictionary lookups (udew, dict, multitran, wiki) directly from the extension.",
   "action": {
-    "default_icon": "Wikibooks-logo.svg.png",
+    "default_icon": "Dictionaries.png",
 	"default_title": "Multi Dictionary Lookup Extension"
   },
   "permissions": [
@@ -19,7 +19,7 @@
 	"https://dict.cc/*"
   ],
   "icons": {
-    "128": "Wikibooks-logo.svg.png"
+    "128": "Dictionaries.png"
   },
   "background": {
     "service_worker": "background.js"
