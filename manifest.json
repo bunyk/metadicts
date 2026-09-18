@@ -5,7 +5,7 @@
   "description": "Perform dictionary lookups (udew, dict, multitran, wiki) directly from the extension.",
   "action": {
     "default_icon": "Dictionaries.png",
-	"default_title": "Multi Dictionary Lookup Extension"
+    "default_title": "Multi Dictionary Lookup Extension"
   },
   "permissions": [
     "storage", "tabs"
