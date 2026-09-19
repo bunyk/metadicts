@@ -56,6 +56,10 @@ function addTranslationRow(entry) {
   tdUk.innerHTML = entry.uk || '';
   const tdSrc = document.createElement('td');
   tdSrc.textContent = entry.source;
+  tdSrc.style.cursor = 'pointer';
+  tdSrc.addEventListener('click', () => {
+    navigator.clipboard.writeText(entry.source);
+  });
 
   tr.appendChild(tdDe);
   tr.appendChild(tdUk);
@@ -79,9 +83,17 @@ function renderBacklog() {
   });
 }
 
+
+
 document.getElementById('edit-link').addEventListener('click', (e) => {
   e.preventDefault();
   navigate('config');
+});
+
+document.getElementById('linguisto').addEventListener('click', (e) => {
+    navigator.clipboard.writeText(
+      'https://github.com/vlddev/linguisto-dicts/blob/master/linguisto_de_uk.xml.zip'
+    );
 });
 
 // ─── Config page ────────────────────────────────────────────────────────────

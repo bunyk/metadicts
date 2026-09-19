@@ -46,7 +46,6 @@
     #backlog-panel li { margin: 2px 0; }
     #backlog-panel a, #config-link {  text-decoration: none; cursor: pointer; }
     #backlog-panel a:hover, #config-link:hover { text-decoration: underline; }
-    #edit-link { display: block; padding: 4px 8px; font-size: 13px; }
     #translations-panel {
       flex: 1;
       overflow-y: scroll;
@@ -85,7 +84,10 @@
 
 <div id="main">
   <div id="backlog-panel">
-    <button id="edit-link">Edit</button>
+	  	<div>
+			<button id="edit-link">Edit</button>
+			<button id="linguisto" title="copy source">Linguisto</button>
+		</div>
     <ul id="backlog-list"></ul>
   </div>
   <div id="translations-panel">
