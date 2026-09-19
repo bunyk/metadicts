@@ -16,7 +16,8 @@
     "https://www.multitran.com/*",
     "https://de.wikipedia.org/*",
 	"https://deuk.dict.cc/*",
-	"https://dict.cc/*"
+	"https://dict.cc/*",
+	"https://api-free.deepl.com/"
   ],
   "icons": {
     "128": "Dictionaries.png"

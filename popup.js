@@ -104,6 +104,7 @@ function showConfig() {
   document.getElementById('main').style.display = 'none';
   document.getElementById('config-page').style.display = 'flex';
   document.getElementById('config-textarea').value = localStorage.getItem('backlog') || '';
+  document.getElementById('deepl-key-input').value = localStorage.getItem('deeplAuthKey') || '';
 }
 
 document.getElementById('config-back-link').addEventListener('click', (e) => {
@@ -123,6 +124,10 @@ document.getElementById('config-textarea').addEventListener('input', (e) => {
   }, 500);
 });
 
+document.getElementById('deepl-key-input').addEventListener('input', (e) => {
+  localStorage.setItem('deeplAuthKey', e.target.value);
+});
+
 // ─── Search input ───────────────────────────────────────────────────────────
 
 document.getElementById('search-input').addEventListener('keydown', (e) => {
@@ -139,7 +144,7 @@ document.getElementById('search-input').addEventListener('keydown', (e) => {
 // ─── Dictionary fetchers ────────────────────────────────────────────────────
 
 function loadTranslations(word, onNewEntry, onLoaded) {
-  const fetchers = { udew, dict, multitran, wiki };
+  const fetchers = { udew, dict, multitran, wiki, deepl };
   const loaded = {};
   for (const [name, fn] of Object.entries(fetchers)) {
     loaded[name] = false;
@@ -147,6 +152,48 @@ function loadTranslations(word, onNewEntry, onLoaded) {
       loaded[name] = true;
       if (Object.values(loaded).every(Boolean)) onLoaded();
     });
+  }
+}
+
+async function deepl(word, onNewEntry, onLoaded) {
+  const authKey = localStorage.getItem('deeplAuthKey');
+  if (!authKey) {
+    onLoaded();
+    return;
+  }
+
+  try {
+    const response = await fetch('https://api-free.deepl.com/v2/translate', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'DeepL-Auth-Key ' + authKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: [word],
+        target_lang: 'UK',
+        source_lang: 'DE'
+      })
+    });
+
+    if (!response.ok) {
+      console.error('DeepL request failed:', response.status);
+      onLoaded();
+      return;
+    }
+
+    const data = await response.json();
+    if (data.translations && data.translations.length > 0) {
+      onNewEntry({
+        de: word,
+        uk: data.translations[0].text,
+        source: 'deepl'
+      });
+    }
+  } catch (error) {
+    console.error('DeepL error:', error);
+  } finally {
+    onLoaded();
   }
 }
 
