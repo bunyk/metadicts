@@ -301,55 +301,52 @@ function multitran(word, onNewEntry, onLoaded) {
   getPage('https://www.multitran.com/m.exe?ll1=3&ll2=33&s=%s&l2=33', word)
     .then(html => {
       const doc = new DOMParser().parseFromString(html, 'text/html');
-      doc.querySelectorAll('table').forEach(t => {
-        if (t.innerHTML.includes('gif/logoe.gif')) return;
-        parseMultitranHTML(t).forEach(onNewEntry);
-      });
+      parseMultitranHTML(doc).forEach(onNewEntry);
     })
-    .finally(() => onLoaded());
+    .finally(onLoaded);
 }
 
+// Walks all rows in document order. A row with an original-language cell
+// (class starting with "orig") starts a new headword; a row with a subject
+// cell ("subj...") and a translation cell ("trans...") yields one entry.
 function parseMultitranHTML(doc) {
-  const source = 'multitran';
   const results = [];
-  const allRows = Array.from(doc.querySelectorAll('tr'));
-  let currentGerman = '', currentPron = '', currentMorph = '';
+  const source = 'multitran';
+  let currentGerman = '';
 
-  function parseGermanRow(row) {
-    const germanCell = row.querySelector('td.orig11 table td[valign="top"]');
-    if (!germanCell) return { germanWord: '', morph: '', pron: '' };
-    const linkEl = germanCell.querySelector('a[href*="m.exe"]');
-    const pronSpan = germanCell.querySelector('span[style*="color:gray"]');
-    const morphSpan = germanCell.querySelector('em span[style*="color:gray"]');
-    return {
-      germanWord: linkEl ? linkEl.textContent.trim() : '',
-      pron: pronSpan ? pronSpan.textContent.trim() : '',
-      morph: morphSpan ? morphSpan.textContent.trim() : '',
-    };
+  function parseHeadword(headTd) {
+    const linkEl = headTd.querySelector('a[href*="m.exe"]');
+    const morphEl = headTd.querySelector('em');
+    const morph = morphEl ? morphEl.textContent.replace(/=/g, '').trim() : '';
+    let germanWord;
+    if (linkEl) {
+      germanWord = linkEl.textContent.trim();
+    } else {
+      const clone = headTd.cloneNode(true);
+      const cloneEm = clone.querySelector('em');
+      if (cloneEm) cloneEm.remove();
+      germanWord = clone.textContent.trim();
+    }
+    const pronSpan = Array.from(headTd.querySelectorAll('span[style*="color:gray"]'))
+      .find(span => !span.closest('em'));
+    const pron = pronSpan ? pronSpan.textContent.replace(/[[\]]/g, '').trim() : '';
+    const parts = [germanWord];
+    if (morph) parts.push(`{${morph}}`);
+    if (pron) parts.push(`[${pron}]`);
+    return parts.filter(Boolean).join(' ');
   }
 
-  function buildGermanString(word, pron, morph) {
-    let morphClean = morph;
-    if (morphClean.startsWith('m')) morphClean = '{m} ' + morphClean.substring(1).trim();
-    else if (morphClean) morphClean = `{${morphClean}}`;
-    const parts = [];
-    if (word) parts.push(word);
-    if (morphClean) parts.push(morphClean);
-    if (pron) parts.push(`[${pron.replace(/\[|\]/g, '')}]`);
-    return parts.join(' ');
-  }
-
-  allRows.forEach(row => {
-    if (row.querySelector('td.orig11')) {
-      const { germanWord, pron, morph } = parseGermanRow(row);
-      currentGerman = germanWord; currentPron = pron; currentMorph = morph;
+  doc.querySelectorAll('tr').forEach(row => {
+    const headTd = row.querySelector('td[class*="orig"]');
+    if (headTd) {
+      currentGerman = parseHeadword(headTd);
       return;
     }
-    const subjTd = row.querySelector('td.subj');
-    const transTd = row.querySelector('td.trans');
-    if (subjTd && transTd) {
-      let ukText = transTd.textContent.trim().replace(/\bm\b/g, '{m}');
-      results.push({ de: buildGermanString(currentGerman, currentPron, currentMorph).trim(), uk: ukText, source });
+    const subjTd = row.querySelector('td[class*="subj"]');
+    const transTd = row.querySelector('td[class*="trans"]');
+    if (subjTd && transTd && currentGerman) {
+      const ukText = transTd.textContent.trim().replace(/\bm\b/g, '{m}');
+      results.push({ de: currentGerman, uk: ukText, source });
     }
   });
 
