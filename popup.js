@@ -212,10 +212,29 @@ function furtherOccurences(html) {
   return html.replace(/<a href="([^"]*)"[^>]*>.*<\/a>/, 'https://udew.uni-leipzig.de$1');
 }
 
+// udew rejects the rest of the day's requests once the quota is exceeded;
+// back off for 8 hours instead of firing requests into the block.
+const UDEW_BLOCK_MS = 8 * 60 * 60 * 1000;
+
+function udewIsBlocked() {
+  return Date.now() < Number(localStorage.getItem('udewBlockedUntil') || 0);
+}
+
 function udew(word, onNewEntry, onLoaded) {
+  if (udewIsBlocked()) {
+    onNewEntry({ de: 'ліміт', uk: '', source: 'udew' });
+    onLoaded();
+    return;
+  }
+
   const loaded = {};
 
   function parse(html) {
+    if (html.includes('Добовий ліміт')) {
+      localStorage.setItem('udewBlockedUntil', String(Date.now() + UDEW_BLOCK_MS));
+      onNewEntry({ de: 'ліміт', uk: '', source: 'udew' });
+      return;
+    }
     const doc = new DOMParser().parseFromString(html, 'text/html');
     doc.querySelectorAll('main > p').forEach(p => {
       const paragraph = p.innerHTML;
