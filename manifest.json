@@ -19,6 +19,13 @@
 	"https://dict.cc/*",
 	"https://api-free.deepl.com/"
   ],
+  "content_scripts": [
+    {
+      "matches": ["https://deuk.dict.cc/*", "https://dict.cc/*", "https://deuk.contribute.dict.cc/*"],
+      "js": ["dictcc-content.js"],
+      "run_at": "document_end"
+    }
+  ],
   "icons": {
     "128": "Dictionaries.png"
   },
