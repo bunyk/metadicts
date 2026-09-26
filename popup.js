@@ -251,50 +251,71 @@ function dict(word, onNewEntry, onLoaded) {
   getPage('https://dict.com/ukrainisch-deutsch/%s', word)
     .then(html => {
       const doc = new DOMParser().parseFromString(html, 'text/html');
-      doc.querySelectorAll('#mycol-center table').forEach(t => {
-        dictTable2Entries(t).forEach(onNewEntry);
-      });
+      dictPage2Entries(doc).forEach(onNewEntry);
     })
-    .finally(() => onLoaded());
+    .finally(onLoaded);
 }
 
-function dictTable2Entries(doc) {
+// dict.com entry page: headword in #entry-header, POS info in #entry-rest,
+// then senses with translations (lex_ful_tran), phrase pairs (lex_ful_coll2)
+// and example sentences (lex_ful_samp2). The fulltext-search hits
+// (lex_ftx_*) are ignored: they are reverse matches, not translations.
+function dictPage2Entries(doc) {
   const results = [];
   const source = 'dict.com';
 
-  const headRow = doc.querySelector('tr.head');
-  if (headRow) {
-    const germanSpan = headRow.querySelector('.lex_ful_entr.l1');
-    const morphSpan = headRow.querySelector('.lex_ful_morf');
-    if (germanSpan) {
-      let germanWord = germanSpan.textContent.trim();
-      let morph = morphSpan ? morphSpan.textContent.trim() : '';
-      if (morph === 'm') morph = '{m}';
-      else if (morph) morph = `{${morph}}`;
-
-      const tranSpan = doc.querySelector('.lex_ful_tran.w.l2');
-      if (tranSpan) {
-        tranSpan.innerHTML.split(/\s*,\s*/).forEach(part => {
-          let ukText = part.replace(/<span class="lex_ful_g">m<\/span>/g, '{ч}').replace(/<[^>]*>/g, '').trim();
-          results.push({ de: morph ? `${germanWord} ${morph}`.trim() : germanWord, uk: ukText, source });
-        });
-      }
-    }
+  let containers = Array.from(doc.querySelectorAll('#entry-body'));
+  if (containers.length === 0) {
+    containers = Array.from(doc.querySelectorAll('section.main-body'));
   }
 
-  doc.querySelectorAll('.lex_ful_coll2').forEach(coll2 => {
-    const germanPhrase = coll2.querySelector('.lex_ful_coll2s.w.l1');
-    const ukrPhrase = coll2.querySelector('.lex_ful_coll2t.w.l2');
-    if (germanPhrase && ukrPhrase) {
-      const gerText = germanPhrase.textContent.trim();
-      ukrPhrase.innerHTML.split(/\s*,\s*/).forEach(fragment => {
-        const ukText = fragment.replace(/<span class="lex_ful_g">m<\/span>/g, '{ч}').replace(/<[^>]*>/g, '').trim();
-        results.push({ de: gerText, uk: ukText, source });
+  containers.forEach(entry => {
+    const entrEl = entry.querySelector('[class*="lex_ful_entr"]');
+    if (!entrEl) return;
+    const germanWord = entrEl.textContent.trim();
+    const morphEl = entry.querySelector('[class*="lex_ful_morf"]');
+    const de = [germanWord, dictMorphTag(morphEl)].filter(Boolean).join(' ');
+
+    entry.querySelectorAll('[class*="lex_ful_tran"]').forEach(tran => {
+      tran.textContent.split(/\s*,\s*/).forEach(part => {
+        const ukText = dictCleanUk(part);
+        if (ukText) results.push({ de, uk: ukText, source });
       });
-    }
+    });
+
+    entry.querySelectorAll('[class*="lex_ful_coll2s"]').forEach(collS => {
+      const collT = collS.parentElement.querySelector('[class*="lex_ful_coll2t"]');
+      if (!collT) return;
+      collT.textContent.split(/\s*,\s*/).forEach(part => {
+        const ukText = dictCleanUk(part);
+        if (ukText) results.push({ de: collS.textContent.trim(), uk: ukText, source });
+      });
+    });
+
+    entry.querySelectorAll('[class*="lex_ful_samp2s"]').forEach(sampS => {
+      const sampT = sampS.parentElement.querySelector('[class*="lex_ful_samp2t"]');
+      if (!sampT) return;
+      const ukText = dictCleanUk(sampT.textContent);
+      if (ukText) results.push({ de: sampS.textContent.trim(), uk: ukText, source });
+    });
   });
 
   return results;
+}
+
+// "Substantiv, Neutrum" -> "{n}", "Substantiv, Maskulin" -> "{m}", etc.
+function dictMorphTag(morphEl) {
+  const morph = morphEl ? morphEl.textContent.trim() : '';
+  if (/Substantiv/.test(morph)) {
+    if (/Neutrum/.test(morph)) return '{n}';
+    if (/Feminin/.test(morph)) return '{f}';
+    if (/Maskulin/.test(morph)) return '{m}';
+  }
+  return '';
+}
+
+function dictCleanUk(text) {
+  return text.replace(/\bm\b/g, '{ч}').trim();
 }
 
 function multitran(word, onNewEntry, onLoaded) {
