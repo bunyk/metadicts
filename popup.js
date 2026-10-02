@@ -141,6 +141,16 @@ document.getElementById('search-input').addEventListener('keydown', (e) => {
   }
 });
 
+// ─── External searches ──────────────────────────────────────────────────────
+
+document.querySelectorAll('#external-searches button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const word = document.getElementById('search-input').value.trim();
+    if (!word) return;
+    window.open(btn.dataset.searchUrl.replace('%s', encodeURIComponent(word)), '_blank');
+  });
+});
+
 // ─── Dictionary fetchers ────────────────────────────────────────────────────
 
 function loadTranslations(word, onNewEntry, onLoaded) {

@@ -4,11 +4,10 @@ Extension for meta-search across multiple German-Ukrainian dictionaries.
 
 ![Screenshot](./screenshot.png)
 
-## Development:
+## Інсталяція:
 
-Done with [CRXJS, follow their documentation](https://crxjs.dev/vite-plugin/getting-started/react/create-project)
+1. Склонувати чи скачати репозиторій.
+2. Відкрити chrome://extensions/
+3. Натиснути "Load unpacked".
+4. Вибрати директорію з репозиторієм.
 
-```bash
-npm install
-npm run dev
-```
